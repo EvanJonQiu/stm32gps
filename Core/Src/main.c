@@ -28,6 +28,7 @@
 #include "fonts.h"
 #include "ssd1306.h"
 #include "nmea_parser.h"
+#include "usart.h"
 
 #include <string.h>
 #include <stdio.h>
@@ -118,6 +119,17 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+
+    if (usart_rx_trnsfer_complete) {
+      nmea_parser_parse(parser, (const char*)usart_rx_buffer, USART_RX_BUFFER_SIZE / 2);
+      usart_rx_trnsfer_complete = 0;
+    }
+
+    if (usart_rx_half_transfer_complete) {
+      nmea_parser_parse(parser, (const char*)usart_rx_buffer + (USART_RX_BUFFER_SIZE / 2), USART_RX_BUFFER_SIZE / 2);
+      usart_rx_half_transfer_complete = 0;
+    }
+
     HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET);
     HAL_Delay(1000);
     HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);

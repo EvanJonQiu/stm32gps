@@ -28,7 +28,6 @@
 uint8_t usart_rx_buffer[USART_RX_BUFFER_SIZE];
 __IO uint8_t usart_rx_trnsfer_complete = 0;
 __IO uint8_t usart_rx_half_transfer_complete = 0;
-
 /* USER CODE END 0 */
 
 UART_HandleTypeDef huart1;
@@ -59,7 +58,10 @@ void MX_USART1_UART_Init(void)
     Error_Handler();
   }
   /* USER CODE BEGIN USART1_Init 2 */
+  // start DMA receive
   HAL_UART_Receive_DMA(&huart1, usart_rx_buffer, USART_RX_BUFFER_SIZE);
+
+  // enable DMA interrupt
   __HAL_DMA_ENABLE_IT(huart1.hdmarx, DMA_IT_HT | DMA_IT_TC);
   /* USER CODE END USART1_Init 2 */
 
@@ -152,8 +154,6 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
   if (huart->Instance == USART1)
   {
     usart_rx_trnsfer_complete = 1;
-
-    nmea_parser_parse(get_nmea_parser(),(const char*)usart_rx_buffer, USART_RX_BUFFER_SIZE / 2);
   }
 }
 
@@ -162,8 +162,6 @@ void HAL_UART_RxHalfCpltCallback(UART_HandleTypeDef *huart)
   if (huart->Instance == USART1)
   {
     usart_rx_half_transfer_complete = 1;
-
-    nmea_parser_parse(get_nmea_parser(),(const char*)usart_rx_buffer + (USART_RX_BUFFER_SIZE / 2), USART_RX_BUFFER_SIZE / 2);
   }
 }
 /* USER CODE END 1 */
